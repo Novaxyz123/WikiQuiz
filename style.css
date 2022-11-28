@@ -100,3 +100,11 @@ body{
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 600px) {
+  #question{
+    font-size:large;
+    text-align: center;
+    height: 50%;
+  }
+}

@@ -11,6 +11,21 @@ let availableQuesions = [];
 
 let questions = [];
 
+let escapeChars = [
+    ['&cent;', '¢'],
+    ['&pound;', '£'],
+    ['&yen;', '¥'],
+    ['&euro;', '€'],
+    ['&copy;', '©'],
+    ['&reg;', '®'],
+    ['&lt;', '<'],
+    ['&gt;', '>'],
+    ['&quot;', '"'],
+    ['&amp;', '&'],
+    ['&#039;', '\''],
+    ['&Eacute;', 'é'],
+];
+
 fetch(
     'https://opentdb.com/api.php?amount=10'
 )
@@ -19,8 +34,12 @@ fetch(
     })
     .then((loadedQuestions) => {
         questions = loadedQuestions.results.map((loadedQuestion) => {
+            let new_question = loadedQuestion.question
+            escapeChars.forEach( function(char){
+                new_question = new_question.replaceAll(char[0], char[1]);
+            })
             const formattedQuestion = {
-                question: loadedQuestion.question,
+                question: new_question,
             };
 
             const answerChoices = [...loadedQuestion.incorrect_answers];
