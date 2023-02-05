@@ -11,21 +11,6 @@ let availableQuesions = [];
 
 let questions = [];
 
-let escapeChars = [
-    ['&cent;', '¢'],
-    ['&pound;', '£'],
-    ['&yen;', '¥'],
-    ['&euro;', '€'],
-    ['&copy;', '©'],
-    ['&reg;', '®'],
-    ['&lt;', '<'],
-    ['&gt;', '>'],
-    ['&quot;', '"'],
-    ['&amp;', '&'],
-    ['&#039;', '\''],
-    ['&Eacute;', 'é'],
-];
-
 fetch(
     'https://opentdb.com/api.php?amount=10'
 )
@@ -34,26 +19,29 @@ fetch(
     })
     .then((loadedQuestions) => {
         questions = loadedQuestions.results.map((loadedQuestion) => {
-            let new_question = loadedQuestion.question
-            escapeChars.forEach( function(char){
-                new_question = new_question.replaceAll(char[0], char[1]);
-            })
-            const formattedQuestion = {
-                question: new_question,
-            };
-
-            const answerChoices = [...loadedQuestion.incorrect_answers];
-            formattedQuestion.answer = Math.floor(Math.random() * 4) + 1;
-            answerChoices.splice(
-                formattedQuestion.answer - 1,
-                0,
-                loadedQuestion.correct_answer
-            );
-
-            answerChoices.forEach((choice, index) => {
-                formattedQuestion['choice' + (index + 1)] = choice;
-            });
-
+            let formattedQuestion = {};
+            if(loadedQuestion.type === "boolean") {
+                formattedQuestion = {
+                    question: loadedQuestion.question,
+                    choice1: 'True',
+                    choice2: 'False',
+                    answer: loadedQuestion.correct_answer === "True" ? 1 : 2
+                };
+            } else {
+                formattedQuestion = {
+                    question: loadedQuestion.question,
+                };
+                const answerChoices = [...loadedQuestion.incorrect_answers];
+                formattedQuestion.answer = Math.floor(Math.random() * 4) + 1;
+                answerChoices.splice(
+                    formattedQuestion.answer - 1,
+                    0,
+                    loadedQuestion.correct_answer
+                );
+                answerChoices.forEach((choice, index) => {
+                    formattedQuestion['choice' + (index + 1)] = choice;
+                });
+            }
             return formattedQuestion;
         });
         startGame();
@@ -85,12 +73,12 @@ getNewQuestion = () => {
     progressBarFull.style.width = `${(questionCounter / MAX_QUESTIONS) * 100}%`;
 
     const questionIndex = Math.floor(Math.random() * availableQuesions.length);
-    currentQuestion = availableQuesions[questionIndex];
-    question.innerText = currentQuestion.question;
+	  currentQuestion = availableQuesions[questionIndex];
+    question.innerHTML = currentQuestion.question;
 
     choices.forEach((choice) => {
         const number = choice.dataset['number'];
-        choice.innerText = currentQuestion['choice' + number];
+        choice.innerHTML = currentQuestion['choice' + number];
     });
 
     availableQuesions.splice(questionIndex, 1);
@@ -105,8 +93,12 @@ choices.forEach((choice) => {
         const selectedChoice = e.target;
         const selectedAnswer = selectedChoice.dataset['number'];
 
-        const classToApply =
-            selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect';
+        let classToApply = '';
+        if(currentQuestion.choice1 === 'True') {
+            classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect';
+        } else {
+            classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect';
+        }
 
         if (classToApply === 'correct') {
             incrementScore(CORRECT_BONUS);
